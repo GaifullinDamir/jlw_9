@@ -119,15 +119,18 @@ public class Library extends JPanel implements ActionListener {
                     + "trustServerCertificate=true;"
                     + "loginTimeout=30;";
             connection = DriverManager.getConnection(dbURL);
+
             statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                     ResultSet.CONCUR_READ_ONLY);
+            System.out.println(ResultSet.TYPE_SCROLL_INSENSITIVE);
+            System.out.println(ResultSet.CONCUR_READ_ONLY);
         } catch (SQLException err) {
             System.out.println(err.getMessage());
         }
     }
 
     private static void createAndShowGUI() {
-        JFrame frame = new JFrame("Библиотека");
+        JFrame frame = new JFrame("Аудитория");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mainFrame = frame;
         JComponent componentPanelAddressBook = new Library();
@@ -143,7 +146,7 @@ public class Library extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         String command = e.getActionCommand();
-        int dataToSize = 13;
+        int dataToSize = 11;
         String[] dataTo = new String[dataToSize];
 
         for (int i = 0; i < dataToSize; i++) {
@@ -153,7 +156,7 @@ public class Library extends JPanel implements ActionListener {
         int delta_size_dialog = 20;
         if ("Добавить".equals(command)) {
             JDialog dialogContact = new JDialog(mainFrame,
-                    "Новая книга", JDialog.DEFAULT_MODALITY_TYPE);
+                    "Новая аудитория", JDialog.DEFAULT_MODALITY_TYPE);
 
             PanelContact panelContact = new PanelContact(command, dataTo);
             dialogContact.setBounds(
@@ -165,32 +168,33 @@ public class Library extends JPanel implements ActionListener {
         }
 
         try {
+            SQL = "SELECT Classroom.*, Employee.* FROM Classroom JOIN Employee ON Classroom.IdEmp = Employee.IdEmployee";
+            result = statement.executeQuery(SQL);
             if ((command.equals("Редактировать") || command.equals("Просмотреть"))
                     && result != null && tableShow.getSelectedRow() > -1) {
                 result.first();
                 do {
                     String value = tableShowModel.getValueAt(tableShow.getSelectedRow(), 0).toString();
-                    if (result.getString("author").equals(value)) {
-                        dataTo[0] = result.getString("id");
-                        dataTo[1] = result.getString("author");
-                        dataTo[2] = result.getString("publication");
-                        dataTo[3] = result.getString("publishing_house");
-                        dataTo[4] = result.getString("year_public");
-                        dataTo[5] = result.getString("pages");
-                        dataTo[6] = result.getString("year_write");
-                        dataTo[7] = result.getString("weight");
-                        dataTo[8] = result.getString("place_id");
-                        dataTo[9] = result.getString("id_place");
-                        dataTo[10] = result.getString("floor");
-                        dataTo[11] = result.getString("wardrobe");
-                        dataTo[12] = result.getString("shelf");
+                    if (result.getString("EducationalBuilding").equals(value)) {
+                        System.out.println(result);
+                        dataTo[0] = result.getString("IdClassroom");
+                        dataTo[1] = result.getString("EducationalBuilding");
+                        dataTo[2] = result.getString("AudienceNumber");
+                        dataTo[3] = result.getString("AudienceName");
+                        dataTo[4] = result.getString("AudienceSquare");
+                        dataTo[5] = result.getString("IdEmp");
+                        dataTo[6] = result.getString("IdEmployee");
+                        dataTo[7] = result.getString("FullName");
+                        dataTo[8] = result.getString("Post");
+                        dataTo[9] = result.getString("PhoneNumber");
+                        dataTo[10] = result.getString("Age");
 
                         String title = "";
                         if (command.equals("Редактировать")) {
-                            title = "Изменить книгу";
+                            title = "Изменить аудиторию";
                         }
                         if (command.equals("Просмотреть")) {
-                            title = "Просмотреть книгу";
+                            title = "Просмотреть аудиторию";
                         }
 
                         JDialog dialogContact = new JDialog(
@@ -283,22 +287,20 @@ public class Library extends JPanel implements ActionListener {
             else if (column == 2)
                 orderBy = "ORDER BY publication ";
 
-            SQL = "SELECT book.*, place.* FROM book JOIN place ON book.place_id = place.id_place " +
-                    "WHERE book.author ILIKE '" + textFind + "%' " + orderBy;
+            SQL = "SELECT Classroom.*, Employee.* FROM Classroom JOIN Employee ON Classroom.IdEmp = Employee.IdEmployee " +
+                    "WHERE Classroom.AudienceNumber LIKE '" + textFind + "%' " + orderBy;
             result = statement.executeQuery(SQL);
             while (result.next()) {
-                String author = result.getString("author");
-                String publication = result.getString("publication");
-                String publishing_house = result.getString("publishing_house");
-                String year_public = result.getString("year_public");
-                String pages = result.getString("pages");
-                String year_write = result.getString("year_write");
-                String weight = result.getString("weight");
-                String floor = result.getString("floor");
-                String wardrobe = result.getString("wardrobe");
-                String shelf = result.getString("shelf");
+                String educationalBuilding = result.getString("EducationalBuilding");
+                String audienceNumber = result.getString("AudienceNumber");
+                String audienceName = result.getString("AudienceName");
+                String audienceSquare = result.getString("AudienceSquare");
+                String fullName = result.getString("FullName");
+                String post = result.getString("Post");
+                String phoneNumber = result.getString("PhoneNumber");
+                String age = result.getString("Age");
                 tableShowModel.addRow(new Object[]
-                        {author, publication, publishing_house, year_public, pages, year_write,weight, floor,  wardrobe, shelf});
+                        {educationalBuilding, audienceNumber, audienceName, audienceSquare, fullName, post, phoneNumber, age});
             }
             labelFindCol.setText("Найдено записей: " + tableShowModel.getRowCount());
         } catch (SQLException err) {
@@ -356,16 +358,14 @@ public class Library extends JPanel implements ActionListener {
         private final String mode;
         private final String[] dataTo;
 
-        private final JTextField txtFieldAuthor;
-        private final JTextField txtFieldPublication;
-        private final JTextField txtPublishingHouse;
-        private final JTextField txtYearPublicated;
-        private final JTextField txtPages;
-        private final JTextField txtWeight;
-        private final JTextField txtFloor;
-        private final JTextField txtWardrobe;
-        private final JTextField txtShelf;
-        private final JTextField txtFielYearWrite;
+        private final JTextField txtFielEducationalBuilding;
+        private final JTextField txtFieldAudienceNumber;
+        private final JTextField txtFieldAudienceName;
+        private final JTextField txtFieldAudienceSquare;
+        private final JTextField txtFieldFullName;
+        private final JTextField txtFieldPost;
+        private final JTextField txtFieldPhoneNumber;
+        private final JTextField txtFieldAge;
 
         public PanelContact(String mode, String[] dataTo) {
             super();
@@ -380,28 +380,24 @@ public class Library extends JPanel implements ActionListener {
             JPanel panelButton = new JPanel();
 
             // Labels
-            JLabel labelAuthor = new JLabel("Автор");
-            JLabel labelPublication = new JLabel("Издание");
-            JLabel labelPublishingHouse = new JLabel("Издательство");
-            JLabel labelYearPublicated = new JLabel("Год публикации");
-            JLabel labelPages = new JLabel("Страниц");
-            JLabel labelPosition = new JLabel("Вес");
-            JLabel labelFloor = new JLabel("Этаж");
-            JLabel labelWardrobe = new JLabel("Шкаф");
-            JLabel labelShelf = new JLabel("Полка");
-            JLabel labelYearWrite = new JLabel("Год написания");
+            JLabel labelEducationalBuilding = new JLabel("EducationalBuilding");
+            JLabel labelAudienceNumber = new JLabel("AudienceNumber");
+            JLabel labelAudienceName = new JLabel("AudienceName");
+            JLabel labelAudienceSquare = new JLabel("AudienceSquare");
+            JLabel labelFullName = new JLabel("FullName");
+            JLabel labelPost = new JLabel("Post");
+            JLabel labelPhoneNumber = new JLabel("PhoneNumber");
+            JLabel labelAge = new JLabel("Age");
 
             // Fields
-            txtFieldAuthor = new JTextField(dataTo[1]);
-            txtFieldPublication = new JTextField(dataTo[2]);
-            txtPublishingHouse = new JTextField(dataTo[3]);
-            txtYearPublicated = new JTextField(dataTo[4]);
-            txtPages = new JTextField(dataTo[5]);
-            txtFielYearWrite = new JTextField(dataTo[6]);
-            txtWeight = new JTextField(dataTo[7]);
-            txtFloor = new JTextField(dataTo[10]);
-            txtWardrobe = new JTextField(dataTo[11]);
-            txtShelf = new JTextField(dataTo[12]);
+            txtFielEducationalBuilding = new JTextField(dataTo[1]);
+            txtFieldAudienceNumber = new JTextField(dataTo[2]);
+            txtFieldAudienceName = new JTextField(dataTo[3]);
+            txtFieldAudienceSquare = new JTextField(dataTo[4]);
+            txtFieldFullName = new JTextField(dataTo[7]);
+            txtFieldPost = new JTextField(dataTo[8]);
+            txtFieldPhoneNumber = new JTextField(dataTo[9]);
+            txtFieldAge = new JTextField(dataTo[10]);
 
             JButton buttonApply = new JButton("Принять");
             buttonApply.addActionListener(this);
@@ -421,16 +417,14 @@ public class Library extends JPanel implements ActionListener {
             panelLabel.setBorder(BorderFactory.createBevelBorder(1));
             panelLabel.setLayout(new GridLayout(8, 1));
 
-            panelLabel.add(labelAuthor);
-            panelLabel.add(labelPublication);
-            panelLabel.add(labelPublishingHouse);
-            panelLabel.add(labelYearPublicated);
-            panelLabel.add(labelPages);
-            panelLabel.add(labelYearWrite);
-            panelLabel.add(labelPosition);
-            panelLabel.add(labelFloor);
-            panelLabel.add(labelWardrobe);
-            panelLabel.add(labelShelf);
+            panelLabel.add(labelEducationalBuilding);
+            panelLabel.add(labelAudienceNumber);
+            panelLabel.add(labelAudienceName);
+            panelLabel.add(labelAudienceSquare);
+            panelLabel.add(labelFullName);
+            panelLabel.add(labelPost);
+            panelLabel.add(labelPhoneNumber);
+            panelLabel.add(labelAge);
 
             panelText.setPreferredSize(new Dimension(
                     2 * width_window / 3,
@@ -438,18 +432,15 @@ public class Library extends JPanel implements ActionListener {
             panelText.setBorder(BorderFactory.createBevelBorder(1));
             panelText.setLayout(new GridLayout(8, 1));
 
-
             // Setup
-            panelText.add(txtFieldAuthor);
-            panelText.add(txtFieldPublication);
-            panelText.add(txtPublishingHouse);
-            panelText.add(txtYearPublicated);
-            panelText.add(txtPages);
-            panelText.add(txtFielYearWrite);
-            panelText.add(txtWeight);
-            panelText.add(txtFloor);
-            panelText.add(txtWardrobe);
-            panelText.add(txtShelf);
+            panelText.add(txtFielEducationalBuilding);
+            panelText.add(txtFieldAudienceNumber);
+            panelText.add(txtFieldAudienceName);
+            panelText.add(txtFieldAudienceSquare);
+            panelText.add(txtFieldFullName);
+            panelText.add(txtFieldPost);
+            panelText.add(txtFieldPhoneNumber);
+            panelText.add(txtFieldAge);
 
 
             panelUp.add(panelLabel);
@@ -464,16 +455,14 @@ public class Library extends JPanel implements ActionListener {
 
             if ("Просмотреть".equals(mode)) {
                 buttonApply.setEnabled(false);
-                txtFieldAuthor.setEditable(false);
-                txtFieldPublication.setEditable(false);
-                txtPublishingHouse.setEditable(false);
-                txtYearPublicated.setEditable(false);
-                txtPages.setEditable(false);
-                txtWeight.setEditable(false);
-                txtFloor.setEditable(false);
-                txtWardrobe.setEditable(false);
-                txtShelf.setEditable(false);
-                txtFielYearWrite.setEditable(false);
+                txtFielEducationalBuilding.setEditable(false);
+                txtFieldAudienceNumber.setEditable(false);
+                txtFieldAudienceName.setEditable(false);
+                txtFieldAudienceSquare.setEditable(false);
+                txtFieldFullName.setEditable(false);
+                txtFieldPost.setEditable(false);
+                txtFieldPhoneNumber.setEditable(false);
+                txtFieldAge.setEditable(false);
             }
         }
 
@@ -493,54 +482,52 @@ public class Library extends JPanel implements ActionListener {
                 dialog.dispose();
             }
             if (command.equals("Принять")) {
-                String author = txtFieldAuthor.getText();
-                String publication = txtFieldPublication.getText();
-                String publishing_house = txtPublishingHouse.getText();
-                String year_public = txtYearPublicated.getText();
-                String pages = txtPages.getText();
-                String year_write = txtFielYearWrite.getText();
-                String weight = txtWeight.getText();
-                String floor = txtFloor.getText();
-                String wardrobe = txtWardrobe.getText();
-                String shelf = txtShelf.getText();
+                String educationalBuilding = txtFielEducationalBuilding.getText();
+                String audienceNumber = txtFieldAudienceNumber.getText();
+                String audienceName = txtFieldAudienceName.getText();
+                String audienceSquare = txtFieldAudienceSquare.getText();
+                String fullName = txtFieldFullName.getText();
+                String post = txtFieldPost.getText();
+                String phoneNumber = txtFieldPhoneNumber.getText();
+                String age = txtFieldAge.getText();
 
-                if (isNumber(year_public) && isNumber(pages) && isNumber(weight) && isNumber(floor) && isNumber(wardrobe) && isNumber(shelf)) {
+                if (isNumber(audienceSquare)  && isNumber(audienceNumber) && isNumber(phoneNumber) && isNumber(age)) {
+                    String updateEmployee = null;
                     String updateAudience = null;
-                    String updateIC = null;
-                    int audience_id;
+                    int idEmployee;
 
                     // max ID
                     try {
-                        result = statement.executeQuery("SELECT id_place FROM place ORDER BY id_place DESC limit 1");
+                        result = statement.executeQuery("SELECT IdEmployee FROM Employee ORDER BY IdEmployee DESC limit 1");
                         result.next();
-                        audience_id = Integer.parseInt(result.getString("id_place")) + 1;
+                        idEmployee = Integer.parseInt(result.getString("IdEmployee")) + 1;
                     } catch (SQLException err) {
                         System.out.println(err.getMessage());
                         return;
                     }
 
                     if (mode.equals("Добавить")) {
-                        updateAudience = String.format("INSERT INTO place (id_place, floor, wardrobe, shelf) " +
-                                        "OVERRIDING SYSTEM VALUE VALUES (%s, %s, %s, %s)",
-                                audience_id, floor, wardrobe, shelf);
+                        updateEmployee = String.format("INSERT Employee" +
+                                        "OVERRIDING SYSTEM VALUE VALUES (%s, %s, %s, %s, %s)",
+                                idEmployee, fullName, post, phoneNumber, age);
 
-                        updateIC = String.format("INSERT INTO book (author, publication, publishing_house, year_public,pages,year_write,weight,place_id) " +
+                        updateAudience = String.format("INSERT Classroom " +
                                         "VALUES ('%s', '%s', '%s', %s, %s, %s, %s, %s)",
-                                author, publication, publishing_house, year_public, pages, year_write, weight, audience_id);
+                                educationalBuilding, audienceNumber, audienceName, audienceSquare, idEmployee);
 
                     }
 
                     if (mode.equals("Редактировать")) {
-                        updateAudience =
+                        updateEmployee =
                                 String.format("UPDATE place " +
                                                 "SET floor = %s, wardrobe = %s, shelf = '%s' " +
                                                 "WHERE id_place = %s",
-                                        floor, wardrobe, shelf, dataTo[9]);
-                        updateIC =
+                                        post, phoneNumber, age, dataTo[9]);
+                        updateAudience =
                                 String.format("UPDATE book SET " +
                                                 "author = '%s', publication = '%s', publishing_house = '%s', year_public = %s, pages = '%s', year_write = '%s', weight = %s " +
                                                 "WHERE id = %s",
-                                        author, publication, publishing_house, year_public, pages, year_write, weight, dataTo[0]);
+                                        educationalBuilding, audienceNumber, audienceName, audienceSquare,  fullName, dataTo[0]);
                     }
 
                     // DB
