@@ -79,7 +79,7 @@ public class Library extends JPanel implements ActionListener {
         add(Box.createRigidArea(new Dimension(0, 10))); // Отступ сверху вниз на 10 пикселей
 
         tableShowModel = new DefaultTableModel(new Object[]
-                {"Автор", "Название издания", "Издательство", "Год Издания", "Кол-во страниц", "Год написания", "Вес", "Этаж", "Шкаф", "Полка"}, 0) {
+                {"учебное здание", "номер аудит.", "наименование", "площадь", "ФИО ответственного", "должность", "телефон", "возраст"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -87,7 +87,7 @@ public class Library extends JPanel implements ActionListener {
         };
 
         tableYoungModel = new DefaultTableModel(new Object[]
-                {"Этаж", "Шкаф", "Полка"}, 0) {
+                {"ФИО ответственного", "должность", "телефон", "возраст"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -111,10 +111,14 @@ public class Library extends JPanel implements ActionListener {
 
         // DB connection
         try {
-            String dbURL = "jdbc:postgresql://localhost:5433/postgres";
-            String user_publishing_house = "postgres";
-            String user_password = "1234";
-            connection = DriverManager.getConnection(dbURL, user_publishing_house, user_password);
+            String dbURL = "jdbc:sqlserver://localhost:1433;"
+                    + "databaseName=ClassroomDB;"
+                    + "user=admin;"
+                    + "password=admin;"
+                    + "encrypt=true;"
+                    + "trustServerCertificate=true;"
+                    + "loginTimeout=30;";
+            connection = DriverManager.getConnection(dbURL);
             statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                     ResultSet.CONCUR_READ_ONLY);
         } catch (SQLException err) {
