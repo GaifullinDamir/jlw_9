@@ -168,6 +168,7 @@ public class Library extends JPanel implements ActionListener {
         }
 
         try {
+
             SQL = "SELECT Classroom.*, Employee.* FROM Classroom JOIN Employee ON Classroom.IdEmp = Employee.IdEmployee";
             result = statement.executeQuery(SQL);
             if ((command.equals("Редактировать") || command.equals("Просмотреть"))
@@ -498,7 +499,7 @@ public class Library extends JPanel implements ActionListener {
 
                     // max ID
                     try {
-                        result = statement.executeQuery("SELECT IdEmployee FROM Employee ORDER BY IdEmployee DESC limit 1");
+                        result = statement.executeQuery("SELECT TOP 1 IdEmployee FROM Employee ORDER BY IdEmployee DESC");
                         result.next();
                         idEmployee = Integer.parseInt(result.getString("IdEmployee")) + 1;
                     } catch (SQLException err) {
@@ -507,12 +508,10 @@ public class Library extends JPanel implements ActionListener {
                     }
 
                     if (mode.equals("Добавить")) {
-                        updateEmployee = String.format("INSERT Employee" +
-                                        "OVERRIDING SYSTEM VALUE VALUES (%s, %s, %s, %s, %s)",
+                        updateEmployee = String.format("SET IDENTITY_INSERT dbo.Employee ON;\n INSERT Employee(IdEmployee, FullName, Post, PhoneNumber, Age) VALUES(%s, '%s', '%s', '%s', %s)",
                                 idEmployee, fullName, post, phoneNumber, age);
 
-                        updateAudience = String.format("INSERT Classroom " +
-                                        "VALUES ('%s', '%s', '%s', %s, %s, %s, %s, %s)",
+                        updateAudience = String.format("INSERT Classroom VALUES('%s', %s, '%s', %s, %s)",
                                 educationalBuilding, audienceNumber, audienceName, audienceSquare, idEmployee);
 
                     }
@@ -532,18 +531,18 @@ public class Library extends JPanel implements ActionListener {
 
                     // DB
                     try {
+                        PreparedStatement employee;
                         PreparedStatement audience;
-                        PreparedStatement IC;
                         connection.setAutoCommit(true);
 
+                        employee = connection.prepareStatement(updateEmployee);
+                        int res = employee.executeUpdate();
+
                         audience = connection.prepareStatement(updateAudience);
-                        int res = audience.executeUpdate();
+                        res = audience.executeUpdate();
 
-                        IC = connection.prepareStatement(updateIC);
-                        res = IC.executeUpdate();
-
+                        employee.close();
                         audience.close();
-                        IC.close();
 
                     } catch (SQLException err1) {
                         try {
