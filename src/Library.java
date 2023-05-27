@@ -39,8 +39,10 @@ public class Library extends JPanel implements ActionListener {
         buttonEdit.addActionListener(this);
         JButton buttonDelete = new JButton("Удалить");
         buttonDelete.addActionListener(this);
-        JButton buttonEdition = new JButton("Издания в указанном шкафу в лексиграфическом порядке");
+        JButton buttonEdition = new JButton("Номера аудиторий");
         buttonEdition.addActionListener(this);
+        JButton buttonYoungest = new JButton("Самые младшие");
+        buttonYoungest.addActionListener(this);
         JButton buttonSum = new JButton("Вывести минимальное и максимальное кол-во страниц на этаже");
         buttonSum.addActionListener(this);
         JButton buttonOrderBuilding = new JButton("Упорядочить по 1 столбцу");
@@ -53,6 +55,7 @@ public class Library extends JPanel implements ActionListener {
         panelControl.add(buttonEdit);
         panelControl.add(buttonDelete);
         panelControl.add(buttonEdition);
+        panelControl.add(buttonYoungest);
         panelControl.add(buttonSum);
         panelControl.add(buttonOrderBuilding);
         panelControl.add(buttonOrderNumber);
@@ -230,8 +233,11 @@ public class Library extends JPanel implements ActionListener {
             findByString("", 2);
         }
 
-        if (command.equals("Издания в указанном шкафу в лексиграфическом порядке")) {
-            findPublication();
+        if (command.equals("Номера аудиторий")) {
+            findAudiences();
+        }
+        if (command.equals("Самые младшие")){
+            findYoungest();
         }
         if (command.equals("Вывести минимальное и максимальное кол-во страниц на этаже")) {
             findPages();
@@ -309,16 +315,40 @@ public class Library extends JPanel implements ActionListener {
         }
     }
 
-    private void findPublication() {
-        if ((tableShow.getSelectedRow() == -1)) return;
-        String wardrobe = tableShowModel.getValueAt(tableShow.getSelectedRow(), 8).toString();
+    private void findAudiences() {
         try {
-            SQL = "select publishing_house from book join place on book.place_id = place.id_place " +
-                    "where wardrobe = " + "'" + wardrobe + "'" + " order by publication";
+            SQL = "SELECT Classroom.AudienceNumber from Classroom join Employee on Classroom.IdEmp = Employee.IdEmployee " +
+                    "ORDER BY AudienceNumber";
             result = statement.executeQuery(SQL);
             String value = "";
             while (result.next()) {
-                value += result.getString("publishing_house");
+                value += result.getString("audienceNumber");
+                value += "\n";
+            }
+            JOptionPane.showMessageDialog(this, value);
+        } catch (SQLException err) {
+            System.out.println(err.getMessage());
+        }
+    }
+
+    private void findYoungest() {
+        try {
+//            SQL = "SELECT Employee.Age, Employee.FullName from Classroom join Employee on Classroom.IdEmp = Employee.IdEmployee " +
+//                    "ORDER BY Employee.Age DESC WHERE Employee.Age = MIN(Employee.Age)";
+            SQL = " WITH DuplicateValue AS (\n" +
+                    "        SELECT MIN(Age) AS MinAge\n" +
+                    "        FROM Employee\n" +
+                    "   )\n" +
+                    "   SELECT FullName, Age\n" +
+                    "   FROM Employee\n" +
+                    "   WHERE Age IN (SELECT * FROM DuplicateValue)\n" +
+                    "   ORDER BY FullName";
+            result = statement.executeQuery(SQL);
+            String value = "";
+            while (result.next()) {
+                value += "ФИО: " + result.getString("fullName") + " ";
+                value +=  "Возраст: " + result.getString("age") ;
+
                 value += "\n";
             }
             JOptionPane.showMessageDialog(this, value);
