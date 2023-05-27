@@ -43,7 +43,7 @@ public class Library extends JPanel implements ActionListener {
         buttonEdition.addActionListener(this);
         JButton buttonYoungest = new JButton("Самые младшие");
         buttonYoungest.addActionListener(this);
-        JButton buttonSum = new JButton("Вывести минимальное и максимальное кол-во страниц на этаже");
+        JButton buttonSum = new JButton("Общая площадь аудиторий");
         buttonSum.addActionListener(this);
         JButton buttonOrderBuilding = new JButton("Упорядочить по 1 столбцу");
         buttonOrderBuilding.addActionListener(this);
@@ -239,8 +239,8 @@ public class Library extends JPanel implements ActionListener {
         if (command.equals("Самые младшие")){
             findYoungest();
         }
-        if (command.equals("Вывести минимальное и максимальное кол-во страниц на этаже")) {
-            findPages();
+        if (command.equals("Общая площадь аудиторий")) {
+            findSquareSum();
         }
 
         try {
@@ -357,26 +357,24 @@ public class Library extends JPanel implements ActionListener {
         }
     }
 
-    private void findPages() {
+    private void findSquareSum() {
         if ((tableShow.getSelectedRow() == -1)) return;
-        String floor = tableShowModel.getValueAt(tableShow.getSelectedRow(), 7).toString();
+        String fullName = tableShowModel.getValueAt(tableShow.getSelectedRow(), 4).toString();
         try {
-            SQL = "select MIN(pages) from book join place on book.place_id = place.id_place " +
-                    "where floor = " + "'" + floor + "'";
+            SQL = "SELECT FullName, AudienceSquare FROM Employee JOIN Classroom on Employee.IdEmployee=Classroom.IdEmp";
             result = statement.executeQuery(SQL);
             String value = "";
-            if (result.next()) {
-                value += "Minimum:";
-                value += result.getString("min");
-            }
-            value += "\n";
-            SQL = "select MAX(pages) from book join place on book.place_id = place.id_place " +
-                    "where floor = " + "'" + floor + "'";
-            result = statement.executeQuery(SQL);
-            if (result.next()) {
-                value += "Maximum:";
-                value += result.getString("max");
-            }
+            var sumSquare = 0.0;
+
+            while (result.next()){
+                var name = result.getString("fullName");
+                if(fullName.equals(name)){
+                    sumSquare += Double.parseDouble(result.getString("AudienceSquare"));
+                }
+                System.out.println(sumSquare);
+
+             };
+            value += "Площадь кабинетов " + fullName + " " + Double.toString(sumSquare);
             JOptionPane.showMessageDialog(this, value);
         } catch (SQLException exception) {
             System.out.println(exception.getMessage());
