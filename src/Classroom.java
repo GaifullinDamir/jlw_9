@@ -79,7 +79,7 @@ public class Classroom extends JPanel implements ActionListener {
         add(Box.createRigidArea(new Dimension(0, 10))); // Отступ сверху вниз на 10 пикселей
 
         tableShowModel = new DefaultTableModel(new Object[]
-                {"учебное здание", "номер аудит.", "наименование", "площадь", "ФИО ответственного", "должность", "телефон", "возраст"}, 0) {
+                {"ID аудитории", "учебное здание", "номер аудит.", "наименование", "площадь", "ID ответственного","ФИО ответственного", "должность", "телефон", "возраст"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -169,8 +169,8 @@ public class Classroom extends JPanel implements ActionListener {
 
         try {
 
-            SQL = "SELECT Classroom.*, Employee.* FROM Classroom JOIN Employee ON Classroom.IdEmp = Employee.IdEmployee";
-            result = statement.executeQuery(SQL);
+//            SQL = "SELECT Classroom.*, Employee.* FROM Classroom JOIN Employee ON Classroom.IdEmp = Employee.IdEmployee";
+//            result = statement.executeQuery(SQL);
             if ((command.equals("Редактировать") || command.equals("Просмотреть"))
                     && result != null && tableShow.getSelectedRow() > -1) {
                 result.first();
@@ -222,14 +222,6 @@ public class Classroom extends JPanel implements ActionListener {
             findByString(textFieldFind.getText(), 0);
         }
 
-        if (command.equals("Упорядочить по 1 столбцу")) {
-            findByString("", 1);
-        }
-
-        if (command.equals("Упорядочить по 2 столбцу")) {
-            findByString("", 2);
-        }
-
         if (command.equals("Номера аудиторий")) {
             findAudiences();
         }
@@ -247,7 +239,7 @@ public class Classroom extends JPanel implements ActionListener {
             if (command.equals("Удалить") && result != null && tableShow.getSelectedRow() > -1) {
                 result.first();
                 do {
-                    String value = tableShowModel.getValueAt(tableShow.getSelectedRow(), 0).toString();
+                    String value = tableShowModel.getValueAt(tableShow.getSelectedRow(), 1).toString();
                     if (result.getString("EducationalBuilding").equals(value)) {
                         String deleteEmployee = "DELETE FROM Employee WHERE IdEmployee = " + result.getString("IdEmployee");
                         String deleteClassroom = "DELETE FROM Classroom WHERE IdClassroom = " + result.getString("IdClassroom");
@@ -301,16 +293,18 @@ public class Classroom extends JPanel implements ActionListener {
                     "WHERE Classroom.AudienceNumber LIKE '" + textFind + "%' " + orderBy;
             result = statement.executeQuery(SQL);
             while (result.next()) {
+                String idClassroom = result.getString("IdClassroom");
                 String educationalBuilding = result.getString("EducationalBuilding");
                 String audienceNumber = result.getString("AudienceNumber");
                 String audienceName = result.getString("AudienceName");
                 String audienceSquare = result.getString("AudienceSquare");
+                String idEmployee = result.getString("IdEmployee");
                 String fullName = result.getString("FullName");
                 String post = result.getString("Post");
                 String phoneNumber = result.getString("PhoneNumber");
                 String age = result.getString("Age");
                 tableShowModel.addRow(new Object[]
-                        {educationalBuilding, audienceNumber, audienceName, audienceSquare, fullName, post, phoneNumber, age});
+                        {idClassroom, educationalBuilding, audienceNumber, audienceName, audienceSquare, idEmployee, fullName, post, phoneNumber, age});
             }
             labelFindCol.setText("Найдено записей: " + tableShowModel.getRowCount());
         } catch (SQLException err) {
@@ -362,7 +356,7 @@ public class Classroom extends JPanel implements ActionListener {
 
     private void findSquareSum() {
         if ((tableShow.getSelectedRow() == -1)) return;
-        String fullName = tableShowModel.getValueAt(tableShow.getSelectedRow(), 4).toString();
+        String fullName = tableShowModel.getValueAt(tableShow.getSelectedRow(), 6).toString();
         try {
             SQL = "SELECT FullName, AudienceSquare FROM Employee JOIN Classroom on Employee.IdEmployee=Classroom.IdEmp";
             result = statement.executeQuery(SQL);
@@ -394,6 +388,7 @@ public class Classroom extends JPanel implements ActionListener {
         private final String mode;
         private final String[] dataTo;
 
+        private final JTextField txtFieldIdEmployee;
         private final JTextField txtFielEducationalBuilding;
         private final JTextField txtFieldAudienceNumber;
         private final JTextField txtFieldAudienceName;
@@ -416,6 +411,7 @@ public class Classroom extends JPanel implements ActionListener {
             JPanel panelButton = new JPanel();
 
             // Labels
+            JLabel labelIdEmployee =new JLabel("IdEmp");
             JLabel labelEducationalBuilding = new JLabel("EducationalBuilding");
             JLabel labelAudienceNumber = new JLabel("AudienceNumber");
             JLabel labelAudienceName = new JLabel("AudienceName");
@@ -426,6 +422,7 @@ public class Classroom extends JPanel implements ActionListener {
             JLabel labelAge = new JLabel("Age");
 
             // Fields
+            txtFieldIdEmployee = new JTextField(dataTo[5]);
             txtFielEducationalBuilding = new JTextField(dataTo[1]);
             txtFieldAudienceNumber = new JTextField(dataTo[2]);
             txtFieldAudienceName = new JTextField(dataTo[3]);
@@ -534,7 +531,7 @@ public class Classroom extends JPanel implements ActionListener {
 
                     // max ID
                     try {
-                        result = statement.executeQuery("SELECT TOP 1 IdEmployee FROM Employee ORDER BY IdEmployee DESC");
+                        result = statement.executeQuery("SELECT IDENT_CURRENT('Employee') as IdEmployee");
                         result.next();
                         idEmployee = Integer.parseInt(result.getString("IdEmployee")) + 1;
                     } catch (SQLException err) {
