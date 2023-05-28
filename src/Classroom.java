@@ -5,7 +5,7 @@ import java.sql.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
-public class Library extends JPanel implements ActionListener {
+public class Classroom extends JPanel implements ActionListener {
     private static JFrame mainFrame = null;
     private static Connection connection = null;
     private static ResultSet result = null;
@@ -19,7 +19,7 @@ public class Library extends JPanel implements ActionListener {
     private final JLabel labelFindCol;
     private final JScrollPane paneYoung;
 
-    public Library() {
+    public Classroom() {
         super();
         setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 
@@ -45,10 +45,8 @@ public class Library extends JPanel implements ActionListener {
         buttonYoungest.addActionListener(this);
         JButton buttonSum = new JButton("Общая площадь аудиторий");
         buttonSum.addActionListener(this);
-        JButton buttonOrderBuilding = new JButton("Упорядочить по 1 столбцу");
-        buttonOrderBuilding.addActionListener(this);
-        JButton buttonOrderNumber = new JButton("Упорядочить по 2 столбцу");
-        buttonOrderNumber.addActionListener(this);
+        JButton buttonSetDefault = new JButton("Сбросить данные");
+        buttonSetDefault.addActionListener(this);
 
         panelControl.add(buttonShow);
         panelControl.add(buttonCreate);
@@ -57,8 +55,7 @@ public class Library extends JPanel implements ActionListener {
         panelControl.add(buttonEdition);
         panelControl.add(buttonYoungest);
         panelControl.add(buttonSum);
-        panelControl.add(buttonOrderBuilding);
-        panelControl.add(buttonOrderNumber);
+        panelControl.add(buttonSetDefault);
         add(panelControl);
 
         //Создание панели "Поиск".
@@ -136,14 +133,14 @@ public class Library extends JPanel implements ActionListener {
         JFrame frame = new JFrame("Аудитория");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mainFrame = frame;
-        JComponent componentPanelAddressBook = new Library();
+        JComponent componentPanelAddressBook = new Classroom();
         frame.setContentPane(componentPanelAddressBook);
         frame.pack();
         frame.setVisible(true);
     }
 
     public static void main(String[] args) {
-        javax.swing.SwingUtilities.invokeLater(Library::createAndShowGUI);
+        javax.swing.SwingUtilities.invokeLater(Classroom::createAndShowGUI);
     }
 
     @Override
@@ -242,26 +239,32 @@ public class Library extends JPanel implements ActionListener {
         if (command.equals("Общая площадь аудиторий")) {
             findSquareSum();
         }
+        if(command.equals("Сбросить данные")){
+            setDefault();
+        }
 
         try {
             if (command.equals("Удалить") && result != null && tableShow.getSelectedRow() > -1) {
                 result.first();
                 do {
                     String value = tableShowModel.getValueAt(tableShow.getSelectedRow(), 0).toString();
-                    if (result.getString("author").equals(value)) {
-                        String deleteIC = "DELETE FROM book WHERE place_id = " + result.getString("place_id");
-                        String deleteAudience = "DELETE FROM place WHERE id_place = " + result.getString("id_place");
+                    if (result.getString("EducationalBuilding").equals(value)) {
+                        String deleteEmployee = "DELETE FROM Employee WHERE IdEmployee = " + result.getString("IdEmployee");
+                        String deleteClassroom = "DELETE FROM Classroom WHERE IdClassroom = " + result.getString("IdClassroom");
 
-                        PreparedStatement IC;
-                        PreparedStatement audience;
+                        PreparedStatement employee;
+                        PreparedStatement classroom;
                         connection.setAutoCommit(true);
 
-                        IC = connection.prepareStatement(deleteIC);
-                        audience = connection.prepareStatement(deleteAudience);
-                        IC.executeUpdate();
-                        audience.executeUpdate();
-                        IC.close();
-                        audience.close();
+                        classroom = connection.prepareStatement(deleteClassroom);
+                        employee = connection.prepareStatement(deleteEmployee);
+
+                        classroom.executeUpdate();
+                        employee.executeUpdate();
+
+                        classroom.close();
+                        employee.close();
+
                         findByString("", 0);
 
                         break;
@@ -379,6 +382,10 @@ public class Library extends JPanel implements ActionListener {
         } catch (SQLException exception) {
             System.out.println(exception.getMessage());
         }
+    }
+
+    private void setDefault(){
+
     }
 
     class PanelContact extends JPanel implements ActionListener {
