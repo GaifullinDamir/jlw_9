@@ -176,7 +176,7 @@ public class Classroom extends JPanel implements ActionListener {
                 result.first();
                 do {
                     String value = tableShowModel.getValueAt(tableShow.getSelectedRow(), 0).toString();
-                    if (result.getString("EducationalBuilding").equals(value)) {
+                    if (result.getString("IdClassroom").equals(value)) {
                         System.out.println(result);
                         dataTo[0] = result.getString("IdClassroom");
                         dataTo[1] = result.getString("EducationalBuilding");
@@ -237,10 +237,12 @@ public class Classroom extends JPanel implements ActionListener {
 
         try {
             if (command.equals("Удалить") && result != null && tableShow.getSelectedRow() > -1) {
+                SQL = "SELECT Classroom.*, Employee.* FROM Classroom JOIN Employee ON Classroom.IdEmp = Employee.IdEmployee";
+                result = statement.executeQuery(SQL);
                 result.first();
                 do {
-                    String value = tableShowModel.getValueAt(tableShow.getSelectedRow(), 1).toString();
-                    if (result.getString("EducationalBuilding").equals(value)) {
+                    String value = tableShowModel.getValueAt(tableShow.getSelectedRow(), 0).toString();
+                    if (result.getString("IdClassroom").equals(value)) {
                         String deleteEmployee = "DELETE FROM Employee WHERE IdEmployee = " + result.getString("IdEmployee");
                         String deleteClassroom = "DELETE FROM Classroom WHERE IdClassroom = " + result.getString("IdClassroom");
 
@@ -383,15 +385,12 @@ public class Classroom extends JPanel implements ActionListener {
             if(result!= null){
                 String truncateClassroom = "TRUNCATE TABLE Classroom\n" +
                         "ALTER TABLE Classroom\n" +
-                        "DROP CONSTRAINT [FK__Classroom__IdEmp__267ABA7A]\n" +
-                        "GO";
-                String truncateEmployee = "TRUNCATE TABLE Employee\n" +
-                        "GO";
+                        "DROP CONSTRAINT [FK__Classroom__IdEmp__267ABA7A]\n";
+                String truncateEmployee = "TRUNCATE TABLE Employee\n";
 
                 String addConstraintClassroom = "ALTER TABLE Classroom\n" +
                         "ADD CONSTRAINT [FK__Classroom__IdEmp__267ABA7A] FOREIGN KEY (IdEmp)\n" +
-                        "REFERENCES Employee (IdEmployee)\n" +
-                        "GO";
+                        "REFERENCES Employee (IdEmployee)\n";
 
 
                 PreparedStatement employee;
@@ -423,14 +422,14 @@ public class Classroom extends JPanel implements ActionListener {
                         "\t\t('Building_4', 444, 'Programmig_audience_4', 404, 4 ),\n" +
                         "\t\t('Building_5', 555, 'Programmig_audience_5', 505, 5 )";
 
-                classroom = connection.prepareStatement(setDefaultValueClassroom);
                 employee = connection.prepareStatement(setDefaultValueEmployee);
+                classroom = connection.prepareStatement(setDefaultValueClassroom);
 
-                classroom.executeUpdate();
                 employee.executeUpdate();
+                classroom.executeUpdate();
 
-                classroom.close();
                 employee.close();
+                classroom.close();
 
                 findByString("", 0);
             }
@@ -615,15 +614,15 @@ public class Classroom extends JPanel implements ActionListener {
 
                     if (mode.equals("Редактировать")) {
                         updateEmployee =
-                                String.format("UPDATE place " +
-                                                "SET floor = %s, wardrobe = %s, shelf = '%s' " +
-                                                "WHERE id_place = %s",
-                                        post, phoneNumber, age, dataTo[9]);
+                                String.format("UPDATE Employee " +
+                                                "SET Post = '%s', PhoneNumber = '%s', Age = %s, FullName= '%s' " +
+                                                "WHERE IdEmployee = %s",
+                                        post, phoneNumber, age, fullName, dataTo[5]);
                         updateAudience =
-                                String.format("UPDATE book SET " +
-                                                "author = '%s', publication = '%s', publishing_house = '%s', year_public = %s, pages = '%s', year_write = '%s', weight = %s " +
-                                                "WHERE id = %s",
-                                        educationalBuilding, audienceNumber, audienceName, audienceSquare,  fullName, dataTo[0]);
+                                String.format("UPDATE Classroom SET " +
+                                                "EducationalBuilding = '%s', AudienceNumber = %s, AudienceName = '%s', AudienceSquare = %s  " +
+                                                "WHERE IdClassroom = %s",
+                                        educationalBuilding, audienceNumber, audienceName, audienceSquare,  dataTo[0]);
                     }
 
                     // DB
