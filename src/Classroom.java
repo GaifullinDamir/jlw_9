@@ -420,6 +420,8 @@ public class Classroom extends JPanel implements ActionListener {
                         "\t\t('Building_2', 222, 'Programmig_audience_2', 202, 2 ),\n" +
                         "\t\t('Building_3', 333, 'Programmig_audience_3', 303, 3 ),\n" +
                         "\t\t('Building_4', 444, 'Programmig_audience_4', 404, 4 ),\n" +
+                        "\t\t('Building_4', 447, 'Programmig_audience_4', 570, 4 ),\n" +
+                        "\t\t('Building_4', 430, 'Programmig_audience_4', 435, 4 ),\n" +
                         "\t\t('Building_5', 555, 'Programmig_audience_5', 505, 5 )";
 
                 employee = connection.prepareStatement(setDefaultValueEmployee);
@@ -588,7 +590,7 @@ public class Classroom extends JPanel implements ActionListener {
                 String phoneNumber = txtFieldPhoneNumber.getText();
                 String age = txtFieldAge.getText();
 
-                if (isNumber(audienceSquare)  && isNumber(audienceNumber) && isNumber(phoneNumber) && isNumber(age)) {
+                if (isNumber(audienceNumber) && isNumber(phoneNumber) && isNumber(age)) {
                     String updateEmployee = null;
                     String updateAudience = null;
                     int idEmployee;
