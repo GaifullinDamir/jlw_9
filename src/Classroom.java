@@ -379,7 +379,72 @@ public class Classroom extends JPanel implements ActionListener {
     }
 
     private void setDefault(){
+        try{
+            if(result!= null){
+                String truncateClassroom = "TRUNCATE TABLE Classroom\n" +
+                        "ALTER TABLE Classroom\n" +
+                        "DROP CONSTRAINT [FK__Classroom__IdEmp__267ABA7A]\n" +
+                        "GO";
+                String truncateEmployee = "TRUNCATE TABLE Employee\n" +
+                        "GO";
 
+                String addConstraintClassroom = "ALTER TABLE Classroom\n" +
+                        "ADD CONSTRAINT [FK__Classroom__IdEmp__267ABA7A] FOREIGN KEY (IdEmp)\n" +
+                        "REFERENCES Employee (IdEmployee)\n" +
+                        "GO";
+
+
+                PreparedStatement employee;
+                PreparedStatement classroom;
+                connection.setAutoCommit(true);
+
+                classroom = connection.prepareStatement(truncateClassroom);
+                employee = connection.prepareStatement(truncateEmployee);
+
+                classroom.executeUpdate();
+                employee.executeUpdate();
+
+                classroom = connection.prepareStatement(addConstraintClassroom);
+                classroom.executeUpdate();
+
+                String setDefaultValueEmployee = "INSERT Employee \n" +
+                        "\tVALUES\n" +
+                        "\t\t('Горохов Андрей Сергеевич', 'Программист', '1111111', 20),\n" +
+                        "\t\t('Зигангирова Булат Мисбахович', 'Программист', '1111112', 21),\n" +
+                        "\t\t('Калеева Данил Андреевич', 'Программист', '1111113', 21),\n" +
+                        "\t\t('Гайфуллин Дамир Равильевич', 'Программист', '1111114', 21),\n" +
+                        "\t\t('Галлямов Ильсур Рамисович', 'Аналитик', '1111115', 21)";
+
+                String setDefaultValueClassroom = "INSERT Classroom\n" +
+                        "\tVALUES\n" +
+                        "\t\t('Building_1', 111, 'Programmig_audience_1', 101, 1 ),\n" +
+                        "\t\t('Building_2', 222, 'Programmig_audience_2', 202, 2 ),\n" +
+                        "\t\t('Building_3', 333, 'Programmig_audience_3', 303, 3 ),\n" +
+                        "\t\t('Building_4', 444, 'Programmig_audience_4', 404, 4 ),\n" +
+                        "\t\t('Building_5', 555, 'Programmig_audience_5', 505, 5 )";
+
+                classroom = connection.prepareStatement(setDefaultValueClassroom);
+                employee = connection.prepareStatement(setDefaultValueEmployee);
+
+                classroom.executeUpdate();
+                employee.executeUpdate();
+
+                classroom.close();
+                employee.close();
+
+                findByString("", 0);
+            }
+        }catch(SQLException err1){
+            try {
+                connection.rollback();
+                connection.setAutoCommit(true);
+                JOptionPane.showMessageDialog(
+                        this, "Транзакция на удаление не выполнена.\nСмотрите сообщения в консоли.");
+                System.out.println(err1.getMessage());
+            } catch (SQLException err2) {
+                System.out.println(err2.getMessage());
+            }
+        }
     }
 
     class PanelContact extends JPanel implements ActionListener {
